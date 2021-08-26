@@ -1,0 +1,195 @@
+---
+title: "One-way ANOVA Demo"
+author: "Chan - Stats Fall 2021"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+---
+One-Way ANOVA (Between) Example 1: 
+This data set contains information on 78 people using one of three diets. Compare weight after 6 weeks (weight6weeks) between Diet 1: No carbohydrates, Diet 2: No meat, and Diet 3: No veggies. What can you conclude about the diet intervention? In your write up, explain what this means to your grandfather who has little to no knowledge of statistics. Then, explain this to someone who is well-versed in statistics. 
+
+# reminder: if you do not have any of the packages listed below *already* installed, please do that before running the first chunk (hint: you don't have ggplot2 and plyr yet...).
+
+```{r}
+library(psych)
+library(jmv)
+library(ggplot2)
+library(plyr)
+library(reshape)
+library(reshape2)
+```
+
+```{r}
+# load in data
+
+diet <- read.csv("/Users/lawrencechan/Desktop/Diet_R.csv")
+```
+
+```{r}
+dat <- descriptives(diet, vars = c('Person', 'gender', 'Age', 'Height', 'pre.weight', 'Diet', 'weight6weeks'), hist = TRUE, sd = TRUE, se = TRUE, skew = TRUE, kurt = TRUE)
+dat
+```
+
+```{r}
+ANOVA(data = diet, dep = 'weight6weeks', factors = c('Diet'), effectSize = 'partEta', postHoc = c('Diet'), postHocCorr = 'tukey', homo = TRUE)
+
+```
+
+```{r}
+# we need to find the standard errors here so we can have beautiful error bars --- always have error bars...always.
+
+summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
+                      conf.interval=.95, .drop=TRUE) {
+  library(plyr)
+  
+  # New version of length which can handle NA's: if na.rm==T, don't count them
+  length2 <- function (x, na.rm=FALSE) {
+    if (na.rm) sum(!is.na(x))
+    else       length(x)
+  }
+  
+  # This does the summary. For each group's data frame, return a vector with
+  # N, mean, and sd
+  datac <- ddply(data, groupvars, .drop=.drop,
+                 .fun = function(xx, col) {
+                   c(N    = length2(xx[[col]], na.rm=na.rm),
+                     mean = mean   (xx[[col]], na.rm=na.rm),
+                     sd   = sd     (xx[[col]], na.rm=na.rm)
+                   )
+                 },
+                 measurevar
+  )
+  
+  # Rename the "mean" column    
+  datac <- rename(datac, c("mean" = measurevar))
+  
+  datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
+  
+  # Confidence interval multiplier for standard error
+  # Calculate t-statistic for confidence interval: 
+  # e.g., if conf.interval is .95, use .975 (above/below), and use df=N-1
+  ciMult <- qt(conf.interval/2 + .5, datac$N-1)
+  datac$ci <- datac$se * ciMult
+  
+  return(datac)
+}
+```
+
+```{r}
+sumdat <- summarySE(diet, measurevar="weight6weeks", groupvars=c("Diet"))
+```
+
+
+```{r}
+# creation of the bar graph - including specifications such as the color, title, addition of error bars, etc. 
+bar1 <- ggplot(sumdat, aes(x = Diet, y = weight6weeks)) +
+  geom_bar(stat='identity', fill = 'lightblue2') +
+  theme_minimal() +
+  geom_errorbar(aes(ymin=weight6weeks-se, ymax=weight6weeks+se), width = .1)
+
+bar1 + ggtitle('Weight by Diet')
+```
+
+One-Way RM ANOVA (Within) Example 2: 
+This data set contains information on 78 people using one of three diets. Compare pre, 6 weeks, and 10 weeks weight broadly across all Diet 1: No carb, Diet 2: No meat, and Diet 3: No veggies. What can you conclude about the diet intervention? In your write up, explain what this means to your grandfather who has little to no knowledge of statistics. Then, explain this to someone who is well-versed in statistics. 
+
+#Check for assumptions! 
+```{r}
+#Assumption 1: IV is categorical & DV is continuous (HINT: There is no stats test for this. What other evidence can you use to check this?)
+diet$diff1 <- (diet$pre.weight - diet$weight6weeks)
+diet$diff2 <- (diet$weight6weeks - diet$weight10weeks)
+diet$diff3 <- (diet$pre.weight - diet$weight10weeks)
+```
+
+```{r}
+#Assumption 2: DV is normally distributed
+# can just do the first describe since it's in wide format and it's easier to see the univariate normality assumptions for the difference scores
+describe(diet)
+
+#Need to "melt" the data to massage a dataframe into a format where one or more columns are identifier variables, while all other columns, considered measured variables, are unpivoted to the row axis, leaving just two non-identifier columns, variable and value. 
+
+diet.melt <- melt(diet, id.vars = "Diet", measure.vars = c("pre.weight", "weight6weeks", "weight10weeks"))
+```
+
+```{r}
+model <- anovaRM(data = diet, 
+                 rm = list(list(label = 'RM Factor 1',
+                                levels = c('pre.weight', 'weight6weeks', 'weight10weeks'))), 
+                 rmCells = list(list(measure = 'pre.weight', cell = 'pre.weight'),
+                                list(measure = 'weight6weeks', cell = 'weight6weeks'),
+                                list(measure = 'weight10weeks', cell = 'weight10weeks')),
+                 rmTerms = list('RM Factor 1'),
+                 effectSize = c('partEta', 'eta'),
+                 spherTests = TRUE,
+                 spherCorr = c('none','GG'),
+                 postHoc = list('RM Factor 1'),
+                 postHocCorr = 'holm',
+                 emMeans = list(NULL))
+model
+
+```
+
+
+```{r}
+# we need to find the standard errors here so we can have beautiful error bars --- always have error bars...always.
+
+summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
+                      conf.interval=.95, .drop=TRUE) {
+  library(plyr)
+  
+  # New version of length which can handle NA's: if na.rm==T, don't count them
+  length2 <- function (x, na.rm=FALSE) {
+    if (na.rm) sum(!is.na(x))
+    else       length(x)
+  }
+  
+  # This does the summary. For each group's data frame, return a vector with
+  # N, mean, and sd
+  datac <- ddply(data, groupvars, .drop=.drop,
+                 .fun = function(xx, col) {
+                   c(N    = length2(xx[[col]], na.rm=na.rm),
+                     mean = mean   (xx[[col]], na.rm=na.rm),
+                     sd   = sd     (xx[[col]], na.rm=na.rm)
+                   )
+                 },
+                 measurevar
+  )
+  
+  # Rename the "mean" column    
+  datac <- rename(datac, c("mean" = measurevar))
+  
+  datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
+  
+  # Confidence interval multiplier for standard error
+  # Calculate t-statistic for confidence interval: 
+  # e.g., if conf.interval is .95, use .975 (above/below), and use df=N-1
+  ciMult <- qt(conf.interval/2 + .5, datac$N-1)
+  datac$ci <- datac$se * ciMult
+  
+  return(datac)
+}
+```
+
+```{r}
+sumdat <- summarySE(diet.melt, measurevar="value", groupvars=c("variable"))
+
+```
+
+
+```{r}
+# creation of the bar graph - including specifications such as the color, title, addition of error bars, etc. 
+bar1 <- ggplot(sumdat, aes(x = variable, y = value)) +
+  geom_bar(stat='identity', fill = 'tomato3') +
+  theme_minimal() +
+  geom_errorbar(aes(ymin=value-se, ymax=value+se), width = .1)
+
+bar1 + ggtitle('Pizza Eaten by Grad Students by Stress Condition')
+
+```
+
+
+
+
+
+
