@@ -1,0 +1,136 @@
+---
+title: "T-test (Independent and Dependent)"
+author: "Chan - Stats Fall 2021"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+Example 1: Congratulations! You have just been hired by the NBA as a Data Scientist. NBA commissioner Adam Silver wants to know whether the positive coaching intervention he created with NBA Headquarters had the same results for the Los Angeles Clippers, who only had the program for 1-month, as the Portland Trail Blazers, who had the program all season long. To test this, you decide to compare total PPG in the 18-19 season between Group A: LA Clippers (n=13), and Group B: Portland Trailblazers (n=13). Based on your findings, should the coaching program be 1-month or season long? Is there a significant difference?
+
+```{r}
+library(psych)
+library(jmv)
+library(summarytools)
+```
+
+```{r}
+IST <- read.csv("/Users/lawrencechan/Desktop/IST.csv")
+```
+
+```{r}
+desc <- descriptives(IST, vars = c('PPG.18.19.'), hist = TRUE, sd = TRUE, se = TRUE, skew = TRUE, kurt = TRUE)
+desc
+```
+
+```{r}
+groupdesc <- descriptives(IST, vars = c('PPG.18.19.'), splitBy = 'TEAM', hist = TRUE, sd = TRUE, se = TRUE, skew = TRUE, kurt = TRUE)
+groupdesc
+
+IST$TEAM <- as.factor(IST$TEAM)
+```
+
+```{r}
+ttestIS(data = IST, vars = 'PPG.18.19.', group = 'TEAM', eqv = TRUE, effectSize = TRUE, ci = TRUE, desc = TRUE)
+```
+
+# Visualization
+
+```{r}
+library(ggplot2)
+library(plyr)
+```
+
+```{r}
+# creating this function will allow you to generate summary stats needed for visualization - mean scores, standard error, etc. It's super useful - keep it handy, you'll see it a lot.
+
+summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
+                      conf.interval=.95, .drop=TRUE) {
+  library(plyr)
+  
+  # New version of length which can handle NA's: if na.rm==T, don't count them
+  length2 <- function (x, na.rm=FALSE) {
+    if (na.rm) sum(!is.na(x))
+    else       length(x)
+  }
+  
+  # This does the summary. For each group's data frame, return a vector with
+  # N, mean, and sd
+  datac <- ddply(data, groupvars, .drop=.drop,
+                 .fun = function(xx, col) {
+                   c(N    = length2(xx[[col]], na.rm=na.rm),
+                     mean = mean   (xx[[col]], na.rm=na.rm),
+                     sd   = sd     (xx[[col]], na.rm=na.rm)
+                   )
+                 },
+                 measurevar
+  )
+  
+  # Rename the "mean" column    
+  datac <- rename(datac, c("mean" = measurevar))
+  
+  datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
+  
+  # Confidence interval multiplier for standard error
+  # Calculate t-statistic for confidence interval: 
+  # e.g., if conf.interval is .95, use .975 (above/below), and use df=N-1
+  ciMult <- qt(conf.interval/2 + .5, datac$N-1)
+  datac$ci <- datac$se * ciMult
+  
+  return(datac)
+}
+```
+
+```{r}
+# Saving the summary data to call when putting in the ggplot2 code for the graph (for geom_errorbar).
+sumdat <- summarySE(IST, measurevar="PPG.18.19.", groupvars=c("TEAM"))
+```
+
+```{r}
+# creation of the bar graph - including specifications such as the color (#GoDodgers), title, addition of error bars, etc. 
+bar1 <- ggplot(sumdat, aes(x = TEAM, y = PPG.18.19.)) +
+  geom_bar(stat='identity', fill = 'magenta') +
+  theme_minimal() +
+  geom_errorbar(aes(ymin=PPG.18.19.-se, ymax=PPG.18.19.+se), width = .1)
+
+bar1 + ggtitle('PPG by Training Program')
+
+```
+
+Example 2: Following up from the previous example, Adam Silver wants to know whether the positive coaching intervention improved player points per game (PPG) for the Lakers. You compare this team's 2018-2019 PPG before and after the intervention. Assume no trades occurred in the season, so the team (aka the sample) from both before and after remained entirely the same. Given this, what analysis can you conduct to find out more about the coaching intervention's efficacy? 1) Explain what this means to NBA Commissioner Adam Silver, who has little to no background in statistics. 2) Then, explain this to someone who is well-versed in statistics (APA format).
+
+```{r}
+library(psych)
+library(jmv)
+```
+
+```{r}
+PST <- read.csv("/Users/lawrencechan/Desktop/PST.csv")
+```
+
+```{r}
+desc <- descriptives(PST, vars = c('Before', 'After'), hist = TRUE, sd = TRUE, se = TRUE, skew = TRUE, kurt = TRUE)
+desc
+```
+```{r}
+PST$diff <- (PST$After-dat$Before)
+
+desc <- descriptives(PST, vars = c('diff'), hist = TRUE, sd = TRUE, se = TRUE, skew = TRUE, kurt = TRUE)
+desc
+```
+
+
+```{r}
+ttestPS(data = PST, pairs = list(list(i1='Before', i2='After')), effectSize = TRUE, ci = TRUE, desc = TRUE)
+```
+
+```{r}
+ggpaired(PST,
+         cond1 = "Before",
+         cond2 = "After",
+         color = "TEAM",
+         line.color = "gray",
+         line.size = 0.4,
+         palette = "Set2")
+```
