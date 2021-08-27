@@ -1,0 +1,326 @@
+---
+title: "Regression Diagnostics"
+author: "Chan - Stats Fall 2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Multiple Regression Diagnostics Demo**
+
+Prompt:
+
+A local resident recently joined Orange County Ocean Lover's Association's giving program and is interested in finding out more about prosocial behavior in members of the organization. Without knowing much about the literature, they develop a short survey to give to a nearby city district in Huntington Beach to find out what influences the amount of money given to their program for community outreach. Ultimately, they must report their findings to the program coordinator and a statistician on the board.
+
+Variables:
+
+Belief - belief that charitable giving has a positive effect on a scale of 1-10.
+Need - rating of perceived amount of need required in the community on a scale of 1-10.
+Interest - rating of level of interest in the project on a scale of 1-10.
+Happy - rating of happiness felt when making donations on a scale of 1-10.
+Amount - amount given from 0 - 10 dollars.
+
+For all variables 99 = missing.
+
+
+```{r}
+dat <- read.csv("/Users/lawrencechan/Desktop/Regression Diagnostics.csv")
+library(psych)
+library(jmv)
+library(car)
+
+#install these packages first
+library(Hmisc)
+library(MVN)
+library(mice)
+library(VIM)
+
+
+dat[dat=="99"] <- NA
+
+```
+
+
+**Descriptive Statistics**
+```{r}
+# Descriptives
+desc_OG <- descriptives(data = dat, 
+                        vars = c('Belief', 'Need', 'Interest', 'Happy', 'Amount'), 
+                        sd = TRUE, 
+                        skew = TRUE, 
+                        kurt = TRUE)
+desc_OG
+
+corr.test(dat)
+
+#First thing to note is the MISSING DATA --> Different N's and the line that literally indicates how many are missing shows there are missing cases
+#Options: (1) delete list-wise (2) impute 
+```
+
+
+**MISSING DATA**
+```{r}
+#check the pattern of missing data
+md.pattern(dat)
+
+mice_plot <-aggr(dat, 
+                 col=c('navyblue', 'yellow'), 
+                 numbers = TRUE, 
+                 sortVars = TRUE, 
+                 labels = names(dat), 
+                 cex.axis = .7, 
+                 gap = 3, 
+                 ylab = c("Missing data", "Pattern"))
+
+#yellow bar chart is percentage missing from each variable
+#blue and yellow chart shows pattern of missing data --> no pattern here
+```
+
+
+```{r}
+# Option 1: Listwise deletion of missing data. New dataset is named "dat.no.NA"
+dat.no.NA <- na.omit(dat)
+
+#check descriptives again
+#N is all 100 now and no missing data
+desc_listwise <- descriptives(data = dat.no.NA, 
+                              vars = c('Belief', 'Need', 'Interest', 'Happy', 'Amount'))
+desc_listwise
+
+```
+
+
+```{r}
+#OR Option 2: Impute with scores
+
+#Median
+dat$Belief_imp <- round(with(dat, impute(Belief)), 2)
+dat$Need_imp <- round(with(dat, impute(Need)), 2)
+dat$Interest_imp <- round(with(dat, impute(Interest)), 2)
+dat$Happy_imp <- round(with(dat, impute(Happy)), 2)
+dat$Amount_imp <- round(with(dat, impute(Amount)), 2)
+
+
+#check descriptives again
+#N is all 106 now and no missing data
+desc_imputed <- descriptives(data = dat, 
+                             vars = c('Belief_imp', 'Need_imp', 'Interest_imp', 'Happy_imp', 'Amount_imp'))
+desc_imputed
+
+
+```
+
+
+**UNIVARIATE NORMALITY AND OUTLIERS**
+```{r}
+#Big data set, can drop a few cases --> so going to continue on with more conservative "delete list-wise" data set
+
+#check skew, kurtosis, and histograms for each variable (especially DV)
+desc2 <- descriptives(data = dat.no.NA, 
+                      vars = c('Belief', 'Need', 'Interest', 'Happy', 'Amount'), 
+                      hist = TRUE, 
+                      sd = TRUE, 
+                      range = TRUE, 
+                      skew = TRUE, 
+                      kurt = TRUE)
+desc2
+
+#Amount (which is the DV) --> skew ~ 2 // kurtosis > 10
+
+```
+
+
+```{r}
+#Identify outliers
+dat.no.NA[abs(scale(dat.no.NA$Belief)) > 3, ]
+dat.no.NA[abs(scale(dat.no.NA$Need)) > 3, ]
+dat.no.NA[abs(scale(dat.no.NA$Interest)) > 3, ]
+dat.no.NA[abs(scale(dat.no.NA$Happy)) > 3, ]
+dat.no.NA[abs(scale(dat.no.NA$Amount)) > 3, ]
+
+#Belief has 2 univariate outliers
+#Happy has 1 univariate outlier
+#Amount has 2 univariate outliers
+
+```
+
+
+```{r}
+#Remove outliers
+dat.no.uni <- dat.no.NA[!abs(scale(dat.no.NA$Belief)) > 3, ]
+dat.no.uni <- dat.no.NA[!abs(scale(dat.no.uni$Need)) > 3, ]
+dat.no.uni <- dat.no.NA[!abs(scale(dat.no.uni$Interest)) > 3, ]
+dat.no.uni <- dat.no.uni[!abs(scale(dat.no.uni$Happy)) > 3, ]
+dat.no.uni <- dat.no.uni[!abs(scale(dat.no.uni$Amount)) > 3, ]
+
+#Removed 5 cases that were outside +/-3 SD's for the variables
+
+#Check descriptives to see how many people now and what the descriptives look like now
+desc_no.uni <- descriptives(data = dat.no.uni, 
+                            vars = c('Belief', 'Need', 'Interest', 'Happy', 'Amount'), 
+                            hist = TRUE, 
+                            sd = TRUE, 
+                            range = TRUE, 
+                            skew = TRUE, 
+                            kurt = TRUE)
+desc_no.uni
+
+#data set is now called "dat.no.uni"
+#everything is now within range of normal distribution
+
+```
+
+
+**TRANSFORMATIONS**
+```{r}
+#Removing the outliers fixed _this_ normality issue, but had it not fixed it you can always transform data to fix normality issues
+
+#Square root transformation for moderate skew
+#Negative skew --> reflect and square root
+dat.no.NA$Amount_T <- sqrt(max(dat.no.NA$Amount) + 1 - dat.no.NA$Amount)
+
+#Log transformation for hella skew
+#Negative skew --> reflect and log
+dat.no.NA$Amount_T2 <- log10(max(dat.no.NA$Amount) + 1 - dat.no.NA$Amount)
+
+head(dat.no.NA)
+
+#check out descriptives for skew and kurtosis now
+desc_transformed <- descriptives(data = dat.no.NA, 
+                                 vars = c('Amount', 'Amount_T', 'Amount_T2'), 
+                                 hist = TRUE, 
+                                 sd = TRUE, 
+                                 range = TRUE, 
+                                 skew = TRUE, 
+                                 kurt = TRUE)
+desc_transformed
+
+```
+
+
+**MULTIVARIATE NORMALITY AND OUTLIERS**
+```{r}
+
+#look at your residuals and the Q-Q plot
+model <- linReg(data = dat.no.uni, 
+                dep = 'Amount', 
+                covs = c('Belief', 'Need', 'Interest', 'Happy'),
+                blocks = list('Belief', 'Need', 'Interest', 'Happy'), 
+                modelTest = TRUE, 
+                r2Adj = TRUE, 
+                stdEst = TRUE, 
+                ciStdEst = TRUE,
+                qqPlot = TRUE, 
+                resPlots = TRUE)
+model
+
+```
+
+
+```{r}
+#Check and remove multivariate outliers based on mahalanobis' distance
+
+#Create a variable of mahalanobis' distance
+x <- dat.no.uni[1:5]
+mean <- colMeans(x)
+Sx <- cov(x)
+dat.no.uni$mahal <- mahalanobis(x, mean, Sx)
+
+#Identify any multivariate outliers based on mahalanobis' distance variable --> +/- 3 SD's of mahalanobis distance mean
+dat.no.uni[abs(scale(dat.no.uni$mahal)) > 3, ]
+
+#There are 2 multivariate outliers
+
+#Remove multivariate outliers
+dat.no.mult <- dat.no.uni[!abs(scale(dat.no.uni$mahal)) > 3,]
+
+```
+
+
+```{r}
+#OR Check and remove multivariate outliers based on cook's distance
+
+#create your model
+model.cook <- lm(dat.no.uni$Amount ~ dat.no.uni$Need + dat.no.uni$Interest + dat.no.uni$Happy + dat.no.uni$Belief)
+
+#find cook's distance for that model
+dat.no.uni$cook <- cooks.distance(model.cook)
+
+#create the cutoff
+Cook.cutoff <- 4/nrow(dat.no.uni) 
+
+# 4/106 --> cutoff = .04
+
+#plot it out
+plot(model.cook, which = 4, cook.levels = Cook.cutoff)
+
+#Add a cutoff line
+abline(h = Cook.cutoff, lty = 2) 
+
+
+#Remove all outliers above your cutoff line
+dat_final <- dat.no.uni[!(dat.no.uni$cook) > .04,]
+
+#Removed 9 multivariate outliers (check n for dat.no.uni and compare with n for dat_final)
+
+```
+
+
+**HOMOSCEDASTICITY**
+```{r}
+
+#Breusch-Pagan test 
+ncvTest(lm(dat_final$Amount ~ dat_final$Belief + dat_final$Need + dat_final$Interest + dat_final$Happy))
+
+#not significant therefore not violated
+
+#If violated utilize the Boxcox transformation
+
+```
+
+
+**MULTICOLLINEARITY**
+```{r}
+
+#VIF and Tolerance
+model2 <- linReg(data = dat_final, 
+                 dep = 'Amount', 
+                 cov = c('Belief', 'Need', 'Interest', 'Happy'),
+                 blocks = list('Belief', 'Need', 'Interest', 'Happy'), 
+                 modelTest = TRUE,
+                 r2Adj = TRUE,
+                 stdEst = TRUE,
+                 ciStdEst = TRUE, 
+                 collin = TRUE)
+model2
+
+```
+
+
+**Multiple Regression with not clean vs. clean data**
+```{r}
+# Multiple regression not clean
+model1 <- linReg(data = dat, 
+                 dep = 'Amount', 
+                 covs = c('Belief', 'Need', 'Interest', 'Happy'),
+                 blocks = list('Belief', 'Need', 'Interest', 'Happy'), 
+                 modelTest = TRUE,
+                 r2Adj = TRUE, 
+                 stdEst = TRUE,
+                 ciStdEst = TRUE)
+model1
+
+#Multiple regression clean
+model3 <- linReg(data = dat_final, 
+                 dep = 'Amount', 
+                 covs = c('Belief', 'Need', 'Interest', 'Happy'),
+                 blocks = list('Belief', 'Need', 'Interest', 'Happy'), 
+                 modelTest = TRUE,
+                 r2Adj = TRUE, 
+                 stdEst = TRUE,
+                 ciStdEst = TRUE)
+model3
+```
+
