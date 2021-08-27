@@ -1,0 +1,79 @@
+---
+title: "Non-Parametric Demos"
+author: "Chan - Stats Fall 2021"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**Demo 1 - Independent t-test** 
+
+```{r}
+
+# Load data and libraries
+dat <- read.csv("/Users/lawrencechan/Desktop/NonPara.csv")
+
+library(jmv)
+library(psych)
+library(car)
+library(effsize)
+```
+
+```{r}
+
+# Descriptives
+desc <-descriptives(dat, 
+                    vars = c('Performance'), 
+                    sd = TRUE, 
+                    range = TRUE, 
+                    min = TRUE, 
+                    max = TRUE, 
+                    skew = TRUE, 
+                    kurt = TRUE,
+                    hist = TRUE)
+desc
+
+# Descriptives by Coompany
+descriptives(data = dat,
+             vars = 'Performance',
+             splitBy = 'Company',
+             sd = TRUE, 
+             min = TRUE,
+             max = TRUE,
+             skew = TRUE,
+             kurt = TRUE, 
+             hist = TRUE)
+
+hist(dat$Performance [dat$Company== '1'])
+hist(dat$Performance [dat$Company== '2'])
+```
+
+
+```{r}
+
+# Mann-Whitney test (with Levene's)
+test <- ttestIS(data = dat, 
+                vars = 'Performance', 
+                group = 'Company', 
+                mann = TRUE, 
+                eqv = TRUE, 
+                effectSize = TRUE)
+test
+
+```
+
+```{r}
+# Cliff's Delta (non-parametric effect size) - a more robust version of Cohen's d which considers the ordinal nature, as opposed to interval, of most behavioral science and psych data (e.g., Likert scale). It is more powerful under conditions such as skewed distributions, etc. Essentially, it computes the dominance (overlap between two distributions) based on the probability that a selected score in Group 1 being greater than Group 2 minus the probability of a selected score in Group 1 being less than Group 2 divided by the product of the n of Group 1 and Group 2. The value range is between -1.0 and +1.0, where anything closer to the absolute value of 1 is no overlap (good) and closer to 0 is complete overlap (not so good).
+
+cliff.delta(Performance ~ Company, data = dat, conf.level = .95, magnitude = TRUE, method = "Cliff's Delta")
+
+# Because this package is nice - it gives you the Delta estimate and an interpretation. We can see that it's a super large effect size. If you were to cautiously compare this is the Cohen's d of 3.55 (which is scary large), then this would make sense. 
+```
+
+```{r}
+#Spearman's Rho
+
+sp1 <- cor.test(dat$Sleep, dat$Performance, method ="spearman")
+sp1
+```
