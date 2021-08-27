@@ -1,0 +1,189 @@
+---
+title: "Linear and Multiple Regression"
+author: "Chan - Stats Fall 2021"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r, echo=FALSE, results=FALSE, message=FALSE, cache=FALSE, warning=FALSE}
+library(knitr); opts_chunk$set(error=TRUE, cache=FALSE)
+```
+
+**Prompt**
+This dataset contains information on new born babies and their parents. It contains mostly continuous variables (although some have only a few values e.g. number of cigarettes smoked per day) and is most useful for correlation and regression. The birthweights of the babies who mothers smoked have been adjusted slightly to exaggerate the differences between mothers who smoked and didn’t smoke so students can see the difference more clearly in a scatterplot with gestational age and scatter colour coded by smoking status.
+
+**Variables:**
+mage - numeric; men's age.
+mheight - numeric; men's height.
+fage - numeric; women's age.
+fheight - numeric; women's height.
+Birthweight - child's birthweight. 
+
+Answer the following questions: 1) Does female age correlate (i.e., predict)  child's birthweight? 2) Does a model with both female age and height work better to predict birthweight? 3) What about a model with both female age, height, and male age and height? In your write up, explain what this means to a new parent health community who has little to no knowledge of statistics. Then, explain this to someone who is well-versed in statistics. 
+
+```{r}
+dat <- read.csv("/Users/lawrencechan/Desktop/Birthweight_reduced_kg_R.csv")
+```
+
+```{r echo = FALSE, message = FALSE}
+library(psych)
+library(car)
+library(lsr)
+library(jmv)
+library(ggeffects)
+library(ggplot2)
+```
+
+
+**Descriptive Statistics and Assumptions**
+```{r}
+# Descriptives
+desc <- descriptives(data = dat, 
+                     vars = c('fage', 'fheight', 'Birthweight'), 
+                     hist = TRUE, 
+                     sd = TRUE, 
+                     range = TRUE, 
+                     skew = TRUE, 
+                     kurt = TRUE)
+desc
+```
+
+```{r}
+# Scatterplots
+# Outcome variable first in abline -- then predictor for regression line code 
+plot(dat$fage, dat$Birthweight, abline(lm(dat$Birthweight ~ dat$fage)))
+plot(dat$fheight, dat$Birthweight, abline(lm(dat$Birthweight ~ dat$fheight)))
+```
+
+**Correlations**
+```{r}
+# Correlation
+# include outcome variable to test total model correlations 
+cortable <- corrMatrix(data = dat, 
+                       vars = c('fage', 'fheight', 'Birthweight'), 
+                       flag = TRUE)
+cortable
+```
+
+
+**Simple Regression**
+```{r}
+# Simple regression
+model1 <- linReg(data = dat, 
+                 dep = 'Birthweight', 
+                 covs = c('fage'), 
+                 blocks = list('fage'), 
+                 modelTest = TRUE, 
+                 stdEst = TRUE)
+model1
+```
+
+```{r}
+# Simple regression
+model2 <- linReg(data = dat, 
+                 dep = 'Birthweight', 
+                 covs = c('fheight'), 
+                 blocks = list('fheight'), 
+                 modelTest = TRUE, 
+                 stdEst = TRUE)
+model2
+```
+
+
+**Multiple Regression**
+```{r}
+# Multiple regression
+model3 <- linReg(data = dat, 
+                 dep = 'Birthweight', 
+                 covs = c('fage', 'fheight'), 
+                 blocks = list(c('fage', 'fheight')), 
+                 modelTest = TRUE, 
+                 stdEst = TRUE, 
+                 ciStdEst = TRUE, 
+                 r2Adj = TRUE)
+model3
+
+model4 <- linReg(data = dat, 
+                 dep = 'Birthweight', 
+                 covs = c('fage', 'fheight', 'mage', 'mheight'), 
+                 blocks = list(c('fage', 'fheight','mage', 'mheight')), 
+                 modelTest = TRUE, 
+                 stdEst = TRUE, 
+                 ciStdEst = TRUE, 
+                 r2Adj = TRUE)
+model4
+```
+
+**Model Comparison**
+```{r}
+# Hierarchical regression with model comparison (R2 change)
+# both of these are significance tests to see whether there is a difference between the two tests you are running
+
+compare1 <- linReg(data = dat, 
+                   dep = 'Birthweight', 
+                   covs = c('fage', 'fheight', 'mage', 'mheight'),
+                   blocks = list(
+                     list('fage', 'fheight'), 
+                     list('mage', 'mheight')), 
+                   modelTest = TRUE,
+                   r2Adj = TRUE,
+                   stdEst = TRUE,
+                   ciStdEst = TRUE)
+compare1
+
+```
+
+```{r}
+# Interpret
+
+```
+
+**Visualization**
+
+```{r}
+plot1 <- ggplot(dat, aes(x=fage, y=Birthweight))+ 
+  geom_point()+
+  geom_smooth(method=lm, se=TRUE, fullrange=TRUE) + xlab("fage") + ggtitle("Female age predicting birthweight") + ylab("Birthweight")
+
+plot1 + theme_minimal()
+
+plot2 <- ggplot(dat, aes(x=fheight, y=Birthweight))+ 
+  geom_point()+
+  geom_smooth(method=lm, se=TRUE, fullrange=TRUE) + xlab("fheight") + ggtitle("Female height predicting birthweight") + ylab("Birthweight")
+
+plot2 + theme_minimal()
+
+plot3 <- ggplot(dat, aes(x=mage, y=Birthweight))+ 
+  geom_point()+
+  geom_smooth(method=lm, se=TRUE, fullrange=TRUE) + xlab("mage") + ggtitle("Male age predicting birthweight") + ylab("Birthweight")
+
+plot3 + theme_minimal()
+
+plot4 <- ggplot(dat, aes(x=mheight, y=Birthweight))+ 
+  geom_point()+
+  geom_smooth(method=lm, se=TRUE, fullrange=TRUE) + xlab("mheight") + ggtitle("Male height predicting birthweight") + ylab("Birthweight")
+
+plot4 + theme_minimal()
+
+```
+
+**Visualization** 
+```{r}
+# Example of plotting a multiple regression model based on female age, female height, male age, and male height predicting birthweight. 
+
+# save regression equation in an object
+fit1 = lm(Birthweight ~ fage + fheight + mage + mheight, data = dat)
+summary(fit1)
+
+# create predicted values from three predictors and save in object
+model_p <- ggpredict(fit1, terms = c('fage', 'fheight', 'mage', 'mheight'), full.data = TRUE,  pretty = FALSE)
+model_p
+
+# plot predicted line
+plot <- ggplot(model_p, aes(x, predicted)) +
+      geom_smooth(method = "lm", se = FALSE, fullrange=TRUE) + xlab("fage + fheight + mage + mheight") + ggtitle("Plot of Model Predicting Birthweight") + ylab("Birthweight") +
+      geom_point() + theme_minimal()
+
+plot 
+```
