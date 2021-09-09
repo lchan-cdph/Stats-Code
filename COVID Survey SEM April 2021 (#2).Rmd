@@ -1,0 +1,446 @@
+---
+title: "COVID Survey SEM April 2021"
+date: "4/7/2021"
+output: word_document
+---
+```{r}
+library(psych)
+library(lavaan)
+library(semPlot)
+```
+
+#k6
+```{r}
+modelfig17 <- '
+#Serial Mediation, COVID Positive predicting K6 mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + k6 + COVIDP'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig17 <-lavaan(modelfig4, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig17, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig18 <- '
+##Serial Mediation, COVID Hospitalized predicting K6 mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + k6 + COVIDH'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig18 <-lavaan(modelfig18, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig18, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig19 <- '
+#Serial Mediation, COVID Death predicting K6 mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + k6 + COVIDD'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig4 <-lavaan(modelfig19, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig19, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig20 <- '
+#Serial Mediation, COVID Delayed Healthcare predicting K6 mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + k6 + COVIDDH'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig20 <-lavaan(modelfig20, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig20, fit.measures = TRUE, standardized = TRUE)
+```
+
+#ANGER
+```{r}
+modelfig21 <- '
+#Serial Mediation, COVID Positive predicting anger mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + ang + COVIDP'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig21 <-lavaan(modelfig21, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig21, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig22 <- '
+##Serial Mediation, COVID Hospitalized predicting anger mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + ang + COVIDH'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig22 <-lavaan(modelfig22, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig22, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig23 <- '
+#Serial Mediation, COVID Death predicting anger mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + ang + COVIDD'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig23 <-lavaan(modelfig23, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig23, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig24 <- '
+#Serial Mediation, COVID Delayed Healthcare predicting anger mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + ang + COVIDDH'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig24 <-lavaan(modelfig24, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig24, fit.measures = TRUE, standardized = TRUE)
+```
+
+#Stress
+```{r}
+modelfig25 <- '
+#Serial Mediation, COVID Positive predicting stress mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + st + COVIDP'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig25 <-lavaan(modelfig25, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig25, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig26 <- '
+##Serial Mediation, COVID Hospitalized predicting stress mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + st + COVIDH'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig26 <-lavaan(modelfig26, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig26, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig27 <- '
+#Serial Mediation, COVID Death predicting stress mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + st + COVIDD'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig27 <-lavaan(modelfig27, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig27, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig28 <- '
+#Serial Mediation, COVID Delayed Healthcare predicting stress mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + st + COVIDDH'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+f#k6
+```{r}
+modelfig29 <- '
+#Serial Mediation, COVID Positive predicting K6 mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + COVIDP + k6'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig29 <-lavaan(modelfig29, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig29, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig30 <- '
+##Serial Mediation, COVID Hospitalized predicting K6 mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + COVIDH + k6'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig18 <-lavaan(modelfig18, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig18, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig19 <- '
+#Serial Mediation, COVID Death predicting K6 mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + k6 + COVIDD'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig4 <-lavaan(modelfig19, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig19, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig20 <- '
+#Serial Mediation, COVID Delayed Healthcare predicting K6 mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + k6 + COVIDDH'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig20 <-lavaan(modelfig20, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig20, fit.measures = TRUE, standardized = TRUE)
+```
+
+#ANGER
+```{r}
+modelfig100 <- '
+#Serial Mediation, COVID Positive predicting anger mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + COVIDP + ang'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig100 <-lavaan(modelfig100, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig100, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig101 <- '
+##Serial Mediation, COVID Hospitalized predicting anger mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ COVIDP'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig101 <-lavaan(modelfig101, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig101, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig102 <- '
+#Serial Mediation, COVID Death predicting anger mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + COVIDD + ang'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig102 <-lavaan(modelfig102, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig102, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig103 <- '
+#Serial Mediation, COVID Delayed Healthcare predicting anger mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + COVIDDH + ang'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig103 <-lavaan(modelfig103, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig103, fit.measures = TRUE, standardized = TRUE)
+```
+
+#Stress
+```{r}
+modelfig103 <- '
+#Serial Mediation, COVID Positive predicting stress mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + COVIDP + st'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig103 <-lavaan(modelfig103, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig103, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig104 <- '
+##Serial Mediation, COVID Hospitalized predicting stress mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + COVIDH + st'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig104 <-lavaan(modelfig104, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig104, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig105 <- '
+#Serial Mediation, COVID Death predicting stress mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + COVIDD + st'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig105 <-lavaan(modelfig105, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig105, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig106 <- '
+#Serial Mediation, COVID Death predicting stress mediating difficulty coping predicting seeking professional healthcare
+# Regressions
+sph ~ dc + COVIDC + st'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig106 <-lavaan(modelfig106, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "COVIDP", "COVIDH", "COVIDD", "COVIDDH"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig106, fit.measures = TRUE, standardized = TRUE)
+```
+
+
+
+
+
+

@@ -1,0 +1,404 @@
+---
+title: "COVID Survey SEM"
+date: "4/2/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(psych)
+library(lavaan)
+library(semPlot)
+```
+
+```{r}
+dim(SEM_1_xlsx)
+```
+
+```{r}
+describe (SEM_1_xlsx[,-1])
+```
+
+```{r}
+SEM <- na.omit(SEM_1_xlsx)
+```
+
+```{r}
+round(cor(SEM[,-1]),2)
+```
+
+## Specify the model using the Lavaan package
+```{r}
+ SEM[,c("st",
+         "k6",
+         "ang",
+         "dc",
+         "uis",
+         "sph")] <-
+     lapply(SEM[,c("st",
+         "k6",
+         "ang",
+         "dc",
+         "uis",
+         "sph")], ordered)
+```
+ 
+```{r}
+#SEM 1, Stressed predicting seeking professional healthcare
+modelfig11 <- '
+# Regressions
+sph ~ st '
+```
+
+```{r}
+#Run SEM 1, Stressed predicting professional healthcare 
+fitfig11 <-lavaan(modelfig11, ordered = c("st", "k6", "ang", "dc", "uis", "sph"), data = SEM)
+```
+
+```{r}
+#Run the SEM 1 model, Stressed predicting professional healthcare 
+summary (fitfig11, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig2 <- '
+#Run SEM 2, Difficulty coping mediating stressed and seeking professional healthcare
+# Regressions
+sph ~ dc + st'
+
+```
+
+```{r}
+#Run the SEM 2 model, Difficulty coping mediating stressed and seeking professional healthcare
+fitfig2 <-lavaan(modelfig2, ordered = c("st", "k6", "ang", "dc", "uis", "sph"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the SEM 2 model,  Difficulty coping mediating stressed and seeking professional healthcare 
+summary (fitfig2, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig3 <- '
+#SEM 3, Kessler 6 predicting seeking professional healthcare
+# Regressions
+sph ~ k6'
+```
+
+```{r}
+#Run the SEM 3 model, Kessler 6 predicting seeking professional healthcare
+fitfig3 <-lavaan(modelfig3, ordered = c("st", "k6", "ang", "dc", "uis", "sph"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the SEM 3 model, Kessler 6 predicting seeking professional healthcare 
+summary (fitfig3, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig4 <- '
+#Mediation, Difficulty coping mediating k6 and seeking professional healthcare
+# Regressions
+sph ~ dc + k6'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare
+fitfig4 <-lavaan(modelfig4, ordered = c("st", "k6", "ang", "dc", "uis", "sph"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating k6 and seeking professional healthcare 
+summary (fitfig4, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig5 <- '
+#Anger predicting seeking professional healthcare
+# Regressions
+sph ~ ang'
+
+```
+
+```{r}
+#Anger predicting seeking professional healthcare
+fitfig5 <-lavaan(modelfig5, ordered = c("st", "k6", "ang", "dc", "uis", "sph"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+modelfig6 <- '
+#Mediation, Difficulty coping mediating anger and seeking professional healthcare
+# Regressions
+sph ~ dc + k6'
+
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating anger and seeking professional healthcare
+fitfig6 <-lavaan(modelfig6, ordered = c("st", "k6", "ang", "dc", "uis", "sph"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Med model, Difficulty coping mediating anger and seeking professional healthcare 
+summary (fitfig6, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+#Anger predicting seeking professional healthcare, mediated by difficulty coping
+summary (fitfig6, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig7 <- '
+#Moderated Mediation
+# Regressions
+sph ~ uis*dc + st'
+
+```
+
+```{r}
+#Run the Mod Med model
+fitfig7 <-lavaan(modelfig7, ordered = c("st", "k6", "ang", "dc", "uis", "sph"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Mod Med model 
+summary (fitfig7, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig8 <- '
+#Moderated Mediation
+# Regressions
+sph ~ uis*dc + k6'
+```
+
+```{r}
+#Run the Mod Med model
+fitfig8 <-lavaan(modelfig8, ordered = c("st", "k6", "ang", "dc", "uis", "sph"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Mod Med model 
+summary (fitfig8, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig9 <- '
+#Moderated Mediation
+# Regressions
+sph ~ uis*dc + ang'
+```
+
+```{r}
+#Run the Mod Med model
+fitfig9 <-lavaan(modelfig9, ordered = c("st", "k6", "ang", "dc", "uis", "sph"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Mod Med model 
+summary (fitfig9, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig10 <- '
+#Binary Logistic Regression
+# Regressions
+sph ~ dc + uis'
+```
+
+```{r}
+#Run the bi lo re model, 
+fitfig10 <-lavaan(modelfig10, ordered = c("st", "k6", "ang", "dc", "uis", "sph"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the bi lo re model 
+summary (fitfig10, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig11 <- '
+#Moderated Mediation
+# Regressions
+sph ~ barr'
+
+```
+
+```{r}
+#Run the Mod model
+fitfig11 <-lavaan(modelfig11, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "barr", "copesub1", "copesub2"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Mod model 
+summary (fitfig11, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig12 <- '
+#Moderated Mediation
+# Regressions
+sph ~ dc + barr'
+
+```
+
+```{r}
+#Run the Mod model
+fitfig12 <-lavaan(modelfig12, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "barr", "copesub1", "copesub2"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Mod model 
+summary (fitfig12, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig13 <- '
+#Moderated Mediation
+# Regressions
+sph ~ uis*dc + barr'
+
+```
+
+```{r}
+#Run the Mod Med model
+fitfig13 <-lavaan(modelfig13, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "barr", "copesub1", "copesub2"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Mod Med model 
+summary (fitfig13, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig14 <- '
+#Moderated Mediation
+# Regressions
+sph ~ copesub1'
+
+```
+
+```{r}
+#Run the Mod Med model
+fitfig14 <-lavaan(modelfig14, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "barr", "copesub1", "copesub2"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Mod Med model 
+summary (fitfig14, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig15 <- '
+#Moderated Mediation
+# Regressions
+sph ~ dc + copesub1'
+
+```
+
+```{r}
+#Run the Mod Med model
+fitfig15 <-lavaan(modelfig15, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "barr", "copesub1", "copesub2"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Mod Med model 
+summary (fitfig15, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig16 <- '
+#Moderated Mediation
+# Regressions
+sph ~ uis*dc + copesub1'
+
+```
+
+```{r}
+#Run the Mod Med model
+fitfig16 <-lavaan(modelfig16, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "barr", "copesub1", "copesub2"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Mod Med model 
+summary (fitfig16, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig14 <- '
+#Moderated Mediation
+# Regressions
+sph ~ copesub2'
+
+```
+
+```{r}
+#Run the Mod Med model
+fitfig14 <-lavaan(modelfig14, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "barr", "copesub1", "copesub2"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Mod Med model 
+summary (fitfig14, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig15 <- '
+#Moderated Mediation
+# Regressions
+sph ~ dc + copesub2'
+
+```
+
+```{r}
+#Run the Mod Med model
+fitfig15 <-lavaan(modelfig15, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "barr", "copesub1", "copesub2"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Mod Med model 
+summary (fitfig15, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+modelfig16 <- '
+#Moderated Mediation
+# Regressions
+sph ~ uis*dc + copesub2'
+
+```
+
+```{r}
+#Run the Mod Med model
+fitfig16 <-lavaan(modelfig16, ordered = c("st", "k6", "ang", "dc", "uis", "sph", "barr", "copesub1", "copesub2"), bootstrap = TRUE, data = SEM)
+```
+
+```{r}
+#Run the Mod Med model 
+summary (fitfig16, fit.measures = TRUE, standardized = TRUE)
+```
+
+```{r}
+# Kruskal Wallis ANOVA w/ Epsilon squared effect size
+kruskal.test(dc ~ st, data = SEM)
+
+library(rcompanion)
+
+epsilonSquared(x = SEM$copesub2,
+               g = SEM$dc)
+```
+
+```{r}
+kruskal.test(dc ~ k6, data = SEM)
+kruskal.test(dc ~ ang, data = SEM)
+kruskal.test(dc ~ uis, data = SEM)
+kruskal.test(dc ~ sph, data = SEM)
+kruskal.test(dc ~ barr, data = SEM)
+kruskal.test(dc ~ copesub1, data = SEM)
+kruskal.test(dc ~ copesub2, data = SEM)
+```
