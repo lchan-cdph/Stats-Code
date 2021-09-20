@@ -1,0 +1,99 @@
+--- title: "MANOVA"
+author: "Chan - Fall Stats 2021 (Huang, 2021)"
+date: "9/20/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#This example will use this simple example: the effects of cognitive behavior therapy (CBT) on obsessive compulsive disorder (OCD). Two dependent variables (DV1 and DV2) are considered: the occurrence of obsession-related behaviors (Actions) and the occurrence of obsession-related cognitions (Thoughts). OCD sufferers are grouped into three conditions: with CBT, with behavior therapy (BT), and with no-treatment (NT).
+
+#link to dataset: The raw data is stored at: https://gaopinghuang0.github.io/2017/11/20/MANOVA-notes-and-R-code
+
+```{r}
+#Install the packages 
+install.packages("WRS", repos="http://R-Forge.R-project.org")
+```
+
+```{r}
+# Directly source the latest version Rallfun-v38.txt
+source("https://dornsife.usc.edu/assets/sites/239/docs/Rallfun-v38.txt")
+```
+
+```{r}
+#Prepare the data
+# rename level label
+OCD$Group<-factor(OCD$Group, levels = c("CBT", "BT", "No Treatment Control"), labels = c("CBT", "BT", "NT"))
+str(OCD)
+```
+
+```{r}
+#Explore the data
+library(reshape2)  # for melt() function
+library(ggplot2)
+# First we need to restructure the data into long format:
+ocdMelt <- melt(OCD, id=c('Group'), measured=c('Actions', 'Thoughts'))
+names(ocdMelt) <- c('Group', 'Outcome_Measure', 'Frequency')
+# plot
+ocdBoxplot <- ggplot(ocdMelt, aes(Group, Frequency, color = Outcome_Measure))
+ocdBoxplot + geom_boxplot() + labs(x='Treatment Group', y='Number of Thoughts/Actions', color='Outcome_Measure') + scale_y_continuous(breaks=seq(0,20, by=2))
+```
+
+```{r}
+#Combine outcome variables
+outcome <- cbind(OCD$Actions, OCD$Thoughts)
+```
+
+```{r}
+#Use new variable as the outcome (containing Actions and Thoughts) in our model: 
+ocdModel <- manova(outcome ~ Group, data=OCD)
+```
+
+```{r}
+#To see the output of the model, we use the summary command; by default, Pillai's trace is used, but we can see others tests as well
+summary(ocdModel, intercept=TRUE)
+
+#For the Group variable, Pillai’s trace has p value 0.049, which indicates a significant difference.
+
+#However, we are still unclear about: which groups differed from which; and whether the effect of therapy was on the Thoughts, Actions, or a combination of both.
+
+#To determine that, we can look at univariate tests.
+```
+
+```{r}
+#The table labelled Response 1 is for the Actions variable and Response 2 is for the Thoughts variable.
+
+#Note that the F values and p values from this follow-up analysis of MANOVA are identical to those obtained if one-way ANOVA was conducted on each dependent variable.
+
+#The p values indicate that there was no significant difference between therapy groups in terms of Thoughts (p=.136) and Actions (p=.08). However, we already know that therapy had a significant impact on OCD based on MANOVA. The reason for the anomaly is simple: the MANOVA takes account of the correlation between dependent variables, and so for these data it has more power to detect group differences.
+
+summary.aov(ocdModel)
+```
+
+
+```{r}
+#In statistics, particularly in analysis of variance and linear regression, a contrast is a linear combination of variables (parameters or statistics) whose coefficients add up to zero, allowing comparison of different treatments
+
+#Note that because the univariate ANOVAs above were both non-significant, we should not interpret these contrasts. However, we still do it purely for an example.
+CBT_vs_NT <- c(1, 0, 0)
+BT_vs_NT <- c(0, 1, 0)
+contrasts(OCD$Group) <- cbind(CBT_vs_NT, BT_vs_NT)
+```
+
+```{r}
+#The contrasts are not part of MANOVA model, and so we need to create separate linear models for each outcome measure. For Thoughts and Actions, we use
+actionModel <- lm(Actions ~ Group, data=OCD)
+thoughtsModel <- lm(Thoughts ~ Group, data=OCD)
+```
+
+```{r}
+summary.lm(actionModel)
+```
+
+```{r}
+summary.lm(thoughtsModel)
+
+#As expected, there is no significant difference. However, in actionModel, there is a significant difference between BT to NT, which is a little unexpected. 
+```
