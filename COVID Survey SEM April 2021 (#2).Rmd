@@ -1,5 +1,5 @@
 ---
-title: "COVID Survey SEM April 2021"
+title: "COVID Survey Structural Equation Modeling April 2021"
 date: "4/7/2021"
 output: word_document
 ---
