@@ -1,0 +1,116 @@
+---
+title: "NAMI WL April - October"
+author: "MHSA Office"
+date: "11/19/2021"
+output: word_document
+---
+```{r echo = FALSE, message = FALSE}
+library(psych)
+library(car)
+library(lsr)
+library(jmv)
+library(ggeffects)
+library(ggplot2)
+```
+
+
+**Descriptive Statistics and Assumptions**
+```{r}
+# Descriptives
+desc <- descriptives(data = NAMI_WL, 
+                     vars = c('Hour', 'CT', 'DOW', 'Avg'), 
+                     hist = TRUE, 
+                     sd = TRUE, 
+                     range = TRUE, 
+                     skew = TRUE, 
+                     kurt = TRUE)
+desc
+```
+
+```{r}
+# Scatterplots
+# Outcome variable first in abline -- then predictor for regression line code 
+plot(NAMI_WL$Hour, NAMI_WL$Avg, abline(lm(NAMI_WL$Avg ~ NAMI_WL$Hour)))
+plot(NAMI_WL$CT, NAMI_WL$Avg, abline(lm(NAMI_WL$Avg ~ NAMI_WL$CT)))
+plot(NAMI_WL$DOW, NAMI_WL$Avg, abline(lm(NAMI_WL$Avg ~ NAMI_WL$DOW)))
+```
+
+**Correlations**
+```{r}
+# Correlation
+# include outcome variable to test total model correlations 
+cortable <- corrMatrix(data = NAMI_WL, 
+                       vars = c('Hour', 'CT', 'DOW', 'Avg'), 
+                       flag = TRUE)
+cortable
+```
+
+
+**Simple Regression**
+```{r}
+# Simple regression
+model1 <- linReg(data = NAMI_WL, 
+                 dep = 'Avg', 
+                 covs = c('Hour'), 
+                 blocks = list('Hour'), 
+                 modelTest = TRUE, 
+                 stdEst = TRUE)
+model1
+```
+
+```{r}
+# Simple regression
+model2 <- linReg(data = NAMI_WL, 
+                 dep = 'Avg', 
+                 covs = c('CT'), 
+                 blocks = list('CT'), 
+                 modelTest = TRUE, 
+                 stdEst = TRUE)
+model2
+```
+
+```{r}
+# Simple regression
+model3 <- linReg(data = NAMI_WL, 
+                 dep = 'Avg', 
+                 covs = c('DOW'), 
+                 blocks = list('DOW'), 
+                 modelTest = TRUE, 
+                 stdEst = TRUE)
+model3
+```
+
+**Multiple Regression**
+```{r}
+# Multiple regression
+model4 <- linReg(data = NAMI_WL, 
+                 dep = 'Avg', 
+                 covs = c('Hour', 'CT'), 
+                 blocks = list(c('Hour', 'CT')), 
+                 modelTest = TRUE, 
+                 stdEst = TRUE, 
+                 ciStdEst = TRUE, 
+                 r2Adj = TRUE)
+model4
+```
+
+```{r}
+model5 <- linReg(data = NAMI_WL, 
+                 dep = 'Avg', 
+                 covs = c('Hour', 'CT', 'DOW'), 
+                 blocks = list(c('Hour', 'CT', 'DOW')), 
+                 modelTest = TRUE, 
+                 stdEst = TRUE, 
+                 ciStdEst = TRUE, 
+                 r2Adj = TRUE)
+model5
+```
+
+```{r}
+NAMI_WL$CT <- factor(NAMI_WL$CT)
+mylogit <- glm(CT ~ Avg + Hour + DOW, data = NAMI_WL, family = "binomial")
+```
+
+```{r}
+summary(mylogit)
+```
