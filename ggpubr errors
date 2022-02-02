@@ -1,0 +1,5 @@
+install.packages("ggpubr", repos = "https://cloud.r-project.org/", dependencies = TRUE)
+
+install.packages("ggpubr",
+                 repos = c("https://cran.rediris.org/", "https://cloud.r-project.org/"),
+                 dependencies = TRUE)
