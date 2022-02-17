@@ -1,0 +1,160 @@
+---
+title: "Network Modeling Markdown - Australia"
+author: "Lawrence Chan"
+date: "March 5th, 2019"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Load necessary libraries 
+
+```{r}
+library(pacman) #Package used to load all packages using p_load()
+
+p_load(knitr, qgraph, NetworkComparisonTest, bootnet, tidyverse, mice, VIM, haven) 
+
+Aus <- read.csv("/Users/lawrencechan/Desktop/Aus.csv")
+
+Aus <- Aus [,-c(1:4,18)]
+```
+
+```{r}
+#IMPUTE MISSING DATA
+
+md.pattern(Aus)
+mice_plot<-aggr(Aus, col = c('navyblue','yellow'), numbers = TRUE, sortVars = TRUE, labels=names(Aus), ced.axis = .7, gap = 3, ylab = c("Missing Data", "Pattern"))
+
+Aus_imp<-mice(Aus, m = 5, maxit = 50, method = 'pmm', seed = 500)
+completedata<-Aus_imp$data
+```
+
+```{r}
+rm(completedata)
+rm(mice_plot)
+rm(Aus_imp)
+
+#Rename variables in mydata
+
+names(Aus)[1]<-"Grit"
+names(Aus)[2]<-"Adapt_2"
+names(Aus)[3]<-"Adapt_3"
+names(Aus)[4]<-"I_Proact_1"
+names(Aus)[5]<-"I_Proact_2"
+names(Aus)[6]<-"T_Proact_1"
+names(Aus)[7]<-"T_Proact_2"
+names(Aus)[8]<-"O_Proact_2"
+names(Aus)[9]<-"O_Proact_3"
+names(Aus)[10]<-"LGO_6"
+names(Aus)[11]<-"LGO_8"
+names(Aus)[12]<-"LGO_9"
+names(Aus)[13]<-"LGO_10"
+names(Aus)[14]<-"SE_Comp"
+names(Aus)[15]<-"Hope_Comp"
+names(Aus)[16]<-"Res_Comp"
+names(Aus)[17]<-"OP_Comp"
+names(Aus)[18]<-"IC_Comp"
+```
+
+
+```{r}
+FreqCOR<-cor_auto(Aus)
+
+FreqCOR
+# round(cor(datX),2)
+
+groups <- list(
+Res=c(1, 2, 3, 14, 15, 16, 17),
+Pro=c(4, 5, 6, 7, 8, 9),
+LM=c(10, 11, 12, 13, 18) )
+```
+
+```{r}
+g1 <- qgraph(FreqCOR, layout = "spring", groups = groups, title = "China Correlation Network", legend.cex = 0.5, details = TRUE)
+
+pdf("g1.pdf", width=10, height=7)
+qgraph(g1)
+dev.off()
+```
+
+```{r}
+g2 <- qgraph(FreqCOR, layout = "spring", graph = "pcor", groups = groups, title = "China Partial Correlation Network", legend.cex = 0.5, details = TRUE)
+
+pdf("g2.pdf", width = 10, height = 7)
+qgraph(g2)
+dev.off()
+```
+
+```{r}
+g3 <- qgraph(FreqCOR, layout = "spring", graph = "EBICglasso", sampleSize = 242, groups = groups, title = "Australia Regularized Correlation Network", legend.cex = 0.5, details = TRUE)
+
+pdf("Australia.pdf", width = 10, height = 7)
+qgraph(g3)
+dev.off()
+```
+
+```{r}
+g3t <- qgraph(FreqCOR, layout = "spring", graph = "EBICglasso", threshold = TRUE, sampleSize = 242, groups = groups, title = "China Regularized Correlation Network (Threshold)", legend.cex = 0.5, details = TRUE)
+
+pdf("g3t.pdf", width = 10, height = 7)
+qgraph(g3t)
+dev.off()
+```
+
+```{r}
+qgraph(FreqCOR, graph = "glasso", layout = "spring", tuning = 0.25,
+                     sampleSize = nrow(Phil), nodeNames = groups, 
+                    groups = groups, legend.cex = 0.2)
+```
+
+```{r}
+qgraph(FreqCOR, graph = "glasso", layout = "spring", tuning = 0.25,
+                    sampleSize = nrow(China), nodeNames = groups, 
+                    groups = groups, legend.cex = 0.2, vsize = 5,
+                    esize = 15, pastel = TRUE, posCol = "#003399",
+                    negCol = "#FF9933", borders = FALSE, vTrans = 200,
+                    details = TRUE)
+```
+
+```{r}
+gEBIC <- EBICglasso(FreqCOR, n = 1112, gamma = .5, lambda.min.ratio = .01)
+
+pdf("gEBIC.pdf", width = 10, height = 7)
+qgraph(gEBIC, layout = "spring", title = "EBICglasso WAIS-IV Network", subtitle = "Gamma = 0.5, Lambda = 0.01", groups = groups)
+dev.off()
+```
+
+```{r}
+gBIC <- EBICglasso(FreqCOR, gamma = .0, lambda.min.ratio = .01, n = 1112)
+
+pdf("gBIC.pdf", width = 10, height = 7)
+qgraph(gBIC, layout = "spring", groups = groups, title = "WAIS-IV BICglasso Network", subtitle = "Gamma = 0.0; Lamba = 0.01" )
+dev.off()
+```
+
+```{r}
+L <- averageLayout(g1,g2,g3)
+
+pdf("Networks.pdf", width=10, height=7)
+qgraph(g1, layout = L)
+qgraph(g2, layout = L)
+qgraph(g3, layout = L)
+
+```
+
+```{r}
+# Fit Statistics of Network models
+
+fitNetwork <- ggmFit(gEBIC, FreqCOR, sampleSize = 1112, ebicTuning = .5)
+fitNetwork2 <- ggmFit(gBIC, FreqCOR, sampleSize = 1112, ebicTuning = .0)
+fitNetwork3 <- ggmFit(g3, FreqCOR, sampleSize = 1112, ebicTuning = .5)
+
+fitNetwork
+fitNetwork3
+fitNetwork2
+```
