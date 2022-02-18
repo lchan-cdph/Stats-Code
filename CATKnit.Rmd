@@ -1,0 +1,107 @@
+---
+title: "CAT"
+author: "Lawrence B. Chan, PhD"
+date: "2/16/2022"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup}
+knitr::opts_chunk$set(cache =TRUE)
+```
+
+```{r}
+library(pacman)
+p_load(knitr, qgraph, NetworkComparisonTest, bootnet, tidyverse, mice, VIM, haven) 
+library(naniar)
+```
+
+```{r}
+vis_miss(CAT)
+```
+
+```{r}
+CAT1 <- CAT [,c(1:10)]
+CAT2 <- CAT [,c(11:20)]
+CAT3 <- CAT [,c(21:30)]
+CAT4 <- CAT [,c(31:40)]
+CAT5 <- CAT [,c(41:50)]
+CAT6 <- CAT [,c(51:60)]
+CAT7 <- CAT [,c(61:70)]
+CAT8 <- CAT [,c(71:79)]
+```
+
+```{r}
+md.pattern(CAT1)
+mice_plot<-aggr(CAT1, col = c('navyblue','yellow'), numbers = TRUE, sortVars = TRUE, labels=names(CAT1), ced.axis = .7, gap = 3, ylab = c("Missing Data", "Pattern"))
+```
+
+```{r}
+md.pattern(CAT2)
+mice_plot<-aggr(CAT2, col = c('navyblue','yellow'), numbers = TRUE, sortVars = TRUE, labels=names(CAT2), ced.axis = .7, gap = 3, ylab = c("Missing Data", "Pattern"))
+```
+
+```{r}
+md.pattern(CAT3)
+mice_plot<-aggr(CAT3, col = c('navyblue','yellow'), numbers = TRUE, sortVars = TRUE, labels=names(CAT3), ced.axis = .7, gap = 3, ylab = c("Missing Data", "Pattern"))
+```
+
+```{r}
+md.pattern(CAT4)
+mice_plot<-aggr(CAT4, col = c('navyblue','yellow'), numbers = TRUE, sortVars = TRUE, labels=names(CAT4), ced.axis = .7, gap = 3, ylab = c("Missing Data", "Pattern"))
+```
+
+```{r}
+md.pattern(CAT5)
+mice_plot<-aggr(CAT5, col = c('navyblue','yellow'), numbers = TRUE, sortVars = TRUE, labels=names(CAT5), ced.axis = .7, gap = 3, ylab = c("Missing Data", "Pattern"))
+```
+
+```{r}
+md.pattern(CAT1)
+mice_plot<-aggr(CAT1, col = c('navyblue','yellow'), numbers = TRUE, sortVars = TRUE, labels=names(CAT1), ced.axis = .7, gap = 3, ylab = c("Missing Data", "Pattern"))
+```
+
+```{r}
+md.pattern(CAT6)
+mice_plot<-aggr(CAT6, col = c('navyblue','yellow'), numbers = TRUE, sortVars = TRUE, labels=names(CAT6), ced.axis = .7, gap = 3, ylab = c("Missing Data", "Pattern"))
+```
+
+```{r}
+md.pattern(CAT7)
+mice_plot<-aggr(CAT7, col = c('navyblue','yellow'), numbers = TRUE, sortVars = TRUE, labels=names(CAT7), ced.axis = .7, gap = 3, ylab = c("Missing Data", "Pattern"))
+```
+
+```{r}
+md.pattern(CAT8)
+mice_plot<-aggr(CAT8, col = c('navyblue','yellow'), numbers = TRUE, sortVars = TRUE, labels=names(CAT8), ced.axis = .7, gap = 3, ylab = c("Missing Data", "Pattern"))
+```
+
+```{r}
+vis_miss(CAT1)
+vis_miss(CAT2)
+vis_miss(CAT3)
+vis_miss(CAT4)
+vis_miss(CAT5)
+vis_miss(CAT6)
+vis_miss(CAT7)
+vis_miss(CAT8)
+```
+
+```{r}
+gg_miss_upset(CAT)
+gg_miss_upset(CAT1)
+gg_miss_upset(CAT2)
+gg_miss_upset(CAT3)
+gg_miss_upset(CAT4)
+gg_miss_upset(CAT5)
+gg_miss_upset(CAT6)
+gg_miss_upset(CAT7)
+gg_miss_upset(CAT8)
+```
+
+```{r}
+gg_miss_upset(CAT, 
+              nsets = 10,
+              nintersects = NA)
+```
